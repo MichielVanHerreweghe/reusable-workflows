@@ -1,0 +1,39 @@
+parameters:
+  - name: SERVICE_CONNECTION
+    type: string
+  - name: LOCATION
+    type: string
+    default: 
+  - name: RESOURCE_GROUP
+    type: string
+    default: 
+  - name: BICEP_FILE
+    default: '_'
+  - name: BICEP_PARAMETERS_FILE
+    default: '_'
+
+steps:
+  - ${{ if and(not(parameters.RESOURCE_GROUP), parameters.LOCATION) }}:
+    - task: AzureCLI@2
+      displayName: 'Deploy Bicep'
+      inputs:
+        azureSubscription: ${{ parameters.SERVICE_CONNECTION }}
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          az deployment sub create \
+            --location ${{ parameters.LOCATION }} \
+            --template-file ${{ parameters.BICEP_FILE }} \
+            --parameters ${{ parameters.BICEP_PARAMETERS_FILE }}
+  - ${{ if parameters.RESOURCE_GROUP}}:
+    - task: AzureCLI@2
+      displayName: 'Deploy Bicep'
+      inputs:
+        azureSubscription: ${{ parameters.SERVICE_CONNECTION }}
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          az deployment group create \
+            --resource-group ${{ parameters.RESOURCE_GROUP }} \
+            --template-file ${{ parameters.BICEP_FILE }} \
+            --parameters ${{ parameters.BICEP_PARAMETERS_FILE }}
