@@ -5,8 +5,8 @@ trigger:
       - main
   paths:
     include:
-      - scripts/bash/tokenization/*
-      - Azure-DevOps/tokenize.yml
+      - /scripts/bash/tokenization/*
+      - /Azure-DevOps/tokenize.yml
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -27,7 +27,7 @@ stages:
         steps:
           - checkout: self
           - script: |
-              chmod +x /scripts/bash/tokenization/tokenize.sh
+              chmod +x /scripts/tokenization/tokenize.sh
             displayName: 'Make script executable'
           - template: /Azure-DevOps/tokenize.yml
             parameters:
@@ -51,7 +51,7 @@ stages:
         steps:
           - checkout: self
           - script: |
-              chmod +x /scripts/bash/tokenization/tokenize.sh
+              chmod +x /scripts/tokenization/tokenize.sh
             displayName: 'Make script executable'
           - template: /Azure-DevOps/tokenize.yml
             parameters:
