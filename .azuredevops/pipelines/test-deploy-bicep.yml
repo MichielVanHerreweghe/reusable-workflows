@@ -20,9 +20,9 @@ variables:
   - name: GROUP_PARAM_FILE
     value: tests/deploy-bicep/resource-group/tst.bicepparam
   - name: SERVICE_CONNECTION
-    value: CloudFuel-PRD
+    value: sp-ado-reusable_workflows
   - name: SUB_RESOURCE_GROUP_NAME
-    value:  'rg-deploy_sub-weu'
+    value: 'rg-deploy_sub-weu'
   - name: SUB_RESOURCE_GROUP_LOCATION
     value: 'westeurope'
 
