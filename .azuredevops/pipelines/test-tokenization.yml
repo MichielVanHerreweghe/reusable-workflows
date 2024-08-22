@@ -27,6 +27,10 @@ stages:
         steps:
           - checkout: self
           - script: |
+              ls
+              ls /scripts/tokenization
+              ls scripts/tokenization
+          - script: |
               chmod +x /scripts/tokenization/tokenize.sh
             displayName: 'Make script executable'
           - template: /Azure-DevOps/tokenize.yml
