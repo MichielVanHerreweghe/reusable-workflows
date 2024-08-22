@@ -5,6 +5,7 @@ trigger:
       - main
   paths:
     include:
+      - .azuredevops/pipelines/test-tokenization.yml
       - /scripts/bash/tokenization/*
       - /Azure-DevOps/tokenize.yml
 
