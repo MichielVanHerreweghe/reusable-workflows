@@ -10,7 +10,7 @@ resource configurationStore 'Microsoft.AppConfiguration/configurationStores@2023
   name: configurationStoreName
   location: resourceGroup().location
   sku: {
-    name: 'Free'
+    name: 'Standard'
   }
 }
 
