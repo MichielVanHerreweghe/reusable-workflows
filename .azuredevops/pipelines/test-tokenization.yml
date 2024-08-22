@@ -17,7 +17,7 @@ variables:
   - name: RESOURCE_GROUP_LOCATION
     value: 'westeurope'
   - name: SERVICE_CONNECTION
-    value: CloudFuel-PRD
+    value: sp-ado-reusable_workflows
 
 stages:
   - stage: tokenize
