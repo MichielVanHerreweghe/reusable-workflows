@@ -30,7 +30,7 @@ stages:
           - script: |
               chmod +x scripts/tokenization/tokenize.sh
             displayName: 'Make script executable'
-          - template: Azure-DevOps/tokenize.yml
+          - template: /Azure-DevOps/tokenize.yml
             parameters:
               FILES: tests/tokenization/plaintext_variables_test.bicep
               TOKEN_VALUES: '[
@@ -54,7 +54,7 @@ stages:
           - script: |
               chmod +x scriptstokenization/tokenize.sh
             displayName: 'Make script executable'
-          - template: Azure-DevOps/tokenize.yml
+          - template: /Azure-DevOps/tokenize.yml
             parameters:
               FILES: tests/tokenization/library_variables_test.bicep
               TOKEN_VALUES: '[
