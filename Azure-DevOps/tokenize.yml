@@ -1,0 +1,37 @@
+parameters:
+  - name: TOKEN_PREFIX
+    type: string
+    default: '<<'
+  - name: TOKEN_SUFFIX
+    type: string
+    default: '>>'
+  - name: FILES
+    type: string
+  - name: TOKEN_VALUES
+    type: string
+  - name: SERVICE_CONNECTION
+    type: string
+
+steps:
+  - task: AzureCLI@2
+    displayName: Replace Tokens
+    inputs:
+      azureSubscription: ${{ parameters.SERVICE_CONNECTION }}
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        chmod +x scripts/bash/tokenization/tokenize.sh
+
+        export TOKEN_PREFIX="${{ parameters.TOKEN_PREFIX }}"
+        export TOKEN_SUFFIX="${{ parameters.TOKEN_SUFFIX }}"
+        export FILES="${{ parameters.FILES }}"
+
+        token_values_array=($(echo "${{ parameters.TOKEN_VALUES }}" | tr -d '[]' | tr "," "\n"))
+
+        for token_value in "${token_values_array[@]}"; do
+          key=$(echo $token_value | cut -d'=' -f1)
+          value=$(echo $token_value | cut -d'=' -f2)
+          export $key=$value
+        done
+        
+        ./scripts/bash/tokenization/tokenize.sh --prefix=$TOKEN_PREFIX --suffix=$TOKEN_SUFFIX $FILES

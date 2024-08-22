@@ -1,0 +1,70 @@
+trigger:
+  branches:
+    include:
+      - master
+      - main
+  paths:
+    include:
+      - scripts/bash/tokenization/*
+      - Azure-DevOps/tokenize.yml
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  - name: RESOURCE_GROUP_NAME
+    value: 'rg-tokenization-weu'
+  - name: RESOURCE_GROUP_LOCATION
+    value: 'westeurope'
+  - name: SERVICE_CONNECTION
+    value: CloudFuel-PRD
+
+stages:
+  - stage: tokenize
+    jobs:
+      - job: plaintext_test
+        displayName: 'Plaintext Variables Test'
+        steps:
+          - checkout: self
+          - script: |
+              chmod +x scripts/bash/tokenization/tokenize.sh
+            displayName: 'Make script executable'
+          - template: Azure-DevOps/tokenize.yml
+            parameters:
+              FILES: tests/tokenization/plaintext_variables_test.bicep
+              TOKEN_VALUES: '[
+                  "RESOURCE_GROUP_NAME=${{ variables.RESOURCE_GROUP_NAME }}",
+                  "LOCATION=${{ variables.LOCATION }}"
+                ]'
+              SERVICE_CONNECTION: ${{ variables.SERVICE_CONNECTION }}
+          - script: |
+              if diff -q tests/tokenization/plaintext_variables_test.bicep tests/tokenization/plaintext_variables_test_solution.bicep > /dev/null; then
+                  exit 0
+              else
+                  exit 1
+              fi
+            displayName: 'Assert results'
+      - job: library_test
+        displayName: 'Library Variables Test'
+        variables:
+          - group: TOKENIZATION_TEST_VARIABLES
+        steps:
+          - checkout: self
+          - script: |
+              chmod +x scripts/bash/tokenization/tokenize.sh
+            displayName: 'Make script executable'
+          - template: Azure-DevOps/tokenize.yml
+            parameters:
+              FILES: tests/tokenization/library_variables_test.bicep
+              TOKEN_VALUES: '[
+                  "TEST_SECRET=$(TEST_SECRET)",
+                  "TEST_VARIABLE=$(TEST_VARIABLE)"
+                ]'
+              SERVICE_CONNECTION: ${{ variables.SERVICE_CONNECTION }}
+          - script: |
+              if diff -q tests/tokenization/library_variables_test.bicep tests/tokenization/library_variables_test_solution.bicep > /dev/null; then
+                exit 0
+              else
+                exit 1
+              fi
+            displayName: 'Assert results'
