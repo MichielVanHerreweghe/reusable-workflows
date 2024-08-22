@@ -1,0 +1,45 @@
+parameters:
+  # General
+  - name: SERVICE_CONNECTION
+    type: string
+
+  # Tokenization
+  - name: TOKEN_PREFIX
+    type: string
+    default: '<<'
+  - name: TOKEN_SUFFIX
+    type: string
+    default: '>>'
+  - name: FILES
+    type: string
+  - name: TOKEN_VALUES
+    type: string
+
+  # Bicep Deployment
+  - name: LOCATION
+    type: string
+    default: 
+  - name: RESOURCE_GROUP
+    type: string
+    default: 
+  - name: BICEP_FILE
+    default: '_'
+  - name: BICEP_PARAMETERS_FILE
+    default: '_'
+
+steps:
+  - ${{ if parameters.TOKEN_VALUES }}:
+    - template: tokenize.yml
+      parameters:
+        TOKEN_PREFIX: ${{ parameters.TOKEN_PREFIX }}
+        TOKEN_SUFFIX: ${{ parameters.TOKEN_SUFFIX }}
+        FILES: ${{ parameters.FILES }}
+        TOKEN_VALUES: ${{ parameters.TOKEN_VALUES }}
+        SERVICE_CONNECTION: ${{ parameters.SERVICE_CONNECTION }}
+  - template: deploy-bicep.yml
+    parameters:
+      SERVICE_CONNECTION: ${{ parameters.SERVICE_CONNECTION }}
+      LOCATION: ${{ parameters.LOCATION }}
+      RESOURCE_GROUP: ${{ parameters.RESOURCE_GROUP }}
+      BICEP_FILE: ${{ parameters.BICEP_FILE }}
+      BICEP_PARAMETERS_FILE: ${{ parameters.BICEP_PARAMETERS_FILE }}

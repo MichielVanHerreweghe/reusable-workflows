@@ -1,0 +1,98 @@
+trigger:
+  branches:
+    include:
+      - master
+      - main
+  paths:
+    include:
+      - Azure-DevOps/tokenize-and-deploy-bicep.yml
+      - .azuredevops\pipelines\test-tokenize-and-deploy-bicep.yml
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  - name: SUB_FILE
+    value: tests/tokenize-and-deploy-bicep/subscription/main.bicep
+  - name: SUB_PARAM_FILE
+    value: tests/tokenize-and-deploy-bicep/subscription/tst.bicepparam
+  - name: GROUP_FILE
+    value: tests/tokenize-and-deploy-bicep/resource-group/main.bicep
+  - name: GROUP_PARAM_FILE
+    value: tests/tokenize-and-deploy-bicep/resource-group/tst.bicepparam
+  - name: SERVICE_CONNECTION
+    value: sp-ado-reusable_workflows
+
+stages:
+  - stage: subscription_test
+    displayName: Test Tokenization and Deployment on Subscription Level
+    variables:
+      - group: TOKENIZE_AND_DEPLOY_TEST_VARIABLES
+    jobs:
+      - job: tokenize_and_deploy
+        displayName: 'Tokenize and Deploy on Subscription Level'
+        steps:
+          - checkout: self
+          - template: /Azure-DevOps/tokenize-and-deploy-bicep.yml
+            parameters:
+              SERVICE_CONNECTION: ${{ variables.SERVICE_CONNECTION }}
+              TOKEN_PREFIX: '<<'
+              TOKEN_SUFFIX: '>>'
+              FILES: ${{ variables.SUB_PARAM_FILE }}
+              TOKEN_VALUES: '[
+                  "SUB_RESOURCE_GROUP_NAME=$(SUB_RESOURCE_GROUP_NAME)",
+                  "SUB_RESOURCE_GROUP_LOCATION=$(SUB_RESOURCE_GROUP_LOCATION)",
+                  "SUB_TAG_SECRET=$(SUB_TAG_SECRET)"
+                ]'
+              LOCATION: $(SUB_RESOURCE_GROUP_LOCATION)
+              BICEP_FILE: $(SUB_FILE)
+              BICEP_PARAMETERS_FILE: $(SUB_PARAM_FILE)
+
+  - stage: resourcegroup_test
+    displayName: Test Tokenization and Deployment on Resource Group Level
+    dependsOn: subscription_test
+    variables:
+      - group: TOKENIZE_AND_DEPLOY_TEST_VARIABLES
+    jobs:
+      - job: tokenize_and_deploy
+        displayName: 'Tokenize and Deploy on Resource Group Level'
+        steps:
+          - checkout: self
+          - template: /Azure-DevOps/tokenize-and-deploy-bicep.yml
+            parameters:
+              SERVICE_CONNECTION: ${{ variables.SERVICE_CONNECTION }}
+              TOKEN_PREFIX: '<<'
+              TOKEN_SUFFIX: '>>'
+              FILES: ${{ variables.GROUP_PARAM_FILE }}
+              TOKEN_VALUES: '[
+                  "GROUP_CONFIGURATION_STORE_NAME=$(GROUP_CONFIGURATION_STORE_NAME)",
+                  "GROUP_CONFIGURATION_KEY_NAME=$(GROUP_CONFIGURATION_KEY_NAME)",
+                  "GROUP_CONFIGURATION_VALUE=$(GROUP_CONFIGURATION_VALUE)"
+                ]'
+              RESOURCE_GROUP: $(SUB_RESOURCE_GROUP_NAME)
+              BICEP_FILE: $(GROUP_FILE)
+              BICEP_PARAMETERS_FILE: $(GROUP_PARAM_FILE)
+
+  - stage: clean_up
+    dependsOn: 
+      - resourcegroup_test
+    displayName: 'Clean Up'
+    variables:
+      - group: TOKENIZE_AND_DEPLOY_TEST_VARIABLES
+    jobs:
+      - job: clean_up
+        displayName: 'Clean Up'
+        steps:
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: ${{ variables.SERVICE_CONNECTION }}
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                az group delete \
+                --name $RESOURCE_GROUP \
+                --yes \
+                --no-wait
+            displayName: 'Delete Deployed Resources'
+            env:
+              RESOURCE_GROUP: $(SUB_RESOURCE_GROUP_NAME)
