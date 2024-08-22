@@ -7,6 +7,7 @@ trigger:
     include:
       - Azure-DevOps/deploy-bicep.yml
       - .azuredevops/pipelines/test-deploy-bicep.yml
+      - tests/deploy-bicep/*
 pool:
   vmImage: 'ubuntu-latest'
 

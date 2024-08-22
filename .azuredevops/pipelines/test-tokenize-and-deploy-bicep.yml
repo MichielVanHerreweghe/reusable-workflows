@@ -6,7 +6,8 @@ trigger:
   paths:
     include:
       - Azure-DevOps/tokenize-and-deploy-bicep.yml
-      - .azuredevops\pipelines\test-tokenize-and-deploy-bicep.yml
+      - .azuredevops/pipelines/test-tokenize-and-deploy-bicep.yml
+      - tests/tokenize-and-deploy-bicep/*
 
 pool:
   vmImage: 'ubuntu-latest'

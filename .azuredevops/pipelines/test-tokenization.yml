@@ -8,6 +8,7 @@ trigger:
       - .azuredevops/pipelines/test-tokenization.yml
       - scripts/bash/tokenization/*
       - Azure-DevOps/tokenize.yml
+      - tests/tokenization/*
 
 pool:
   vmImage: 'ubuntu-latest'
