@@ -6,8 +6,8 @@ trigger:
   paths:
     include:
       - .azuredevops/pipelines/test-tokenization.yml
-      - /scripts/bash/tokenization/*
-      - /Azure-DevOps/tokenize.yml
+      - scripts/bash/tokenization/*
+      - Azure-DevOps/tokenize.yml
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -28,22 +28,18 @@ stages:
         steps:
           - checkout: self
           - script: |
-              ls
-              ls /scripts/tokenization
-              ls scripts/tokenization
-          - script: |
-              chmod +x /scripts/tokenization/tokenize.sh
+              chmod +x scripts/tokenization/tokenize.sh
             displayName: 'Make script executable'
-          - template: /Azure-DevOps/tokenize.yml
+          - template: Azure-DevOps/tokenize.yml
             parameters:
-              FILES: /tests/tokenization/plaintext_variables_test.bicep
+              FILES: tests/tokenization/plaintext_variables_test.bicep
               TOKEN_VALUES: '[
                   "RESOURCE_GROUP_NAME=${{ variables.RESOURCE_GROUP_NAME }}",
                   "LOCATION=${{ variables.LOCATION }}"
                 ]'
               SERVICE_CONNECTION: ${{ variables.SERVICE_CONNECTION }}
           - script: |
-              if diff -q /tests/tokenization/plaintext_variables_test.bicep /tests/tokenization/plaintext_variables_test_solution.bicep > /dev/null; then
+              if diff -q tests/tokenization/plaintext_variables_test.bicep tests/tokenization/plaintext_variables_test_solution.bicep > /dev/null; then
                   exit 0
               else
                   exit 1
@@ -56,18 +52,18 @@ stages:
         steps:
           - checkout: self
           - script: |
-              chmod +x /scripts/tokenization/tokenize.sh
+              chmod +x scriptstokenization/tokenize.sh
             displayName: 'Make script executable'
-          - template: /Azure-DevOps/tokenize.yml
+          - template: Azure-DevOps/tokenize.yml
             parameters:
-              FILES: /tests/tokenization/library_variables_test.bicep
+              FILES: tests/tokenization/library_variables_test.bicep
               TOKEN_VALUES: '[
                   "TEST_SECRET=$(TEST_SECRET)",
                   "TEST_VARIABLE=$(TEST_VARIABLE)"
                 ]'
               SERVICE_CONNECTION: ${{ variables.SERVICE_CONNECTION }}
           - script: |
-              if diff -q /tests/tokenization/library_variables_test.bicep /tests/tokenization/library_variables_test_solution.bicep > /dev/null; then
+              if diff -q tests/tokenization/library_variables_test.bicep tests/tokenization/library_variables_test_solution.bicep > /dev/null; then
                 exit 0
               else
                 exit 1
