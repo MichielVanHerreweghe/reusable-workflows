@@ -17,3 +17,5 @@ jobs:
           uses: actions/checkout@v2
         - name: Run versioning
           uses: ./.github/workflows/versioning.yml
+          with:
+            METADATA_FILE_PATH: 'tests/version/version.yaml'

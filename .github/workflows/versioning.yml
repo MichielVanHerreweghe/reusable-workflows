@@ -13,7 +13,7 @@ permissions:
   contents: write
 
 env:
-  METADATA_FILE_PATH: ${{ inputs.METADATA_FILE_PATH || 'samples/version/metadata.yml' }}
+  METADATA_FILE_PATH: ${{ inputs.METADATA_FILE_PATH }}
 
 jobs:
   version:
