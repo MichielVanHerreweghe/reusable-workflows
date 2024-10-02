@@ -1,7 +1,7 @@
 name: Test Versioning
 
 on:
-  pull_request: 
+  push: 
     branches:
       - main
     paths:
@@ -10,10 +10,6 @@ on:
 
 jobs:
   test:
-    name: Test Versioning Pipeline
-    runs-on: ubuntu-latest
-    steps:
-        - name:  Checkout code
-          uses: actions/checkout@v2
-        - name: Run versioning
-          uses: ./.github/workflows/versioning.yml
+    uses: MichielVanHerreweghe/reusable-workflows/.github/workflows/versioning.yml@main
+    with:
+        VERSION_FILE_PATH: 'tests/version/version.yml'
