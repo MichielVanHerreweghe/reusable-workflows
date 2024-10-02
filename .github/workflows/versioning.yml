@@ -6,6 +6,10 @@ on:
       METADATA_FILE_PATH:
         type: string
         description: 'Path to the metadata file containing the version number'
+    outputs:
+      NEW_VERSION:
+        value: ${{ jobs.version.outputs.NEW_VERSION}}
+        description: 'The new version number'
 
 permissions: 
   contents: write
@@ -14,6 +18,8 @@ jobs:
   version:
     runs-on: ubuntu-latest
     name: Version
+    outputs:
+      NEW_VERSION: ${{ steps.calculate_new_version.outputs.new_version }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -26,6 +32,7 @@ jobs:
 
     - name: Calculate new version
       shell: bash
+      id: calculate_new_version
       run: |
         IFS='.' read -r major minor patch <<< "$version"
 
@@ -41,6 +48,7 @@ jobs:
 
         new_version="$major.$minor.$patch"
         echo "new_version=$new_version" >> $GITHUB_ENV
+        echo "NEW_VERSION=$new_version" >> $GITHUB_OUTPUT
       env:
         version: ${{ env.version }}
 
