@@ -12,9 +12,6 @@ on:
 permissions: 
   contents: write
 
-env:
-  METADATA_FILE_PATH: ${{ inputs.METADATA_FILE_PATH }}
-
 jobs:
   version:
     runs-on: ubuntu-latest
@@ -26,7 +23,7 @@ jobs:
     - name: Read last version
       shell: bash
       run: |
-        version=$(grep -E '^version: [0-9]+\.[0-9]+\.[0-9]+' "${{ env.METADATA_FILE_PATH }}" | awk '{print $2}')
+        version=$(grep -E '^version: [0-9]+\.[0-9]+\.[0-9]+' "${{ inputs.METADATA_FILE_PATH }}" | awk '{print $2}')
         echo "version=$version" >> $GITHUB_ENV
 
     - name: Calculate new version
@@ -52,7 +49,7 @@ jobs:
     - name: Write new version
       shell: bash
       run: |
-        sed -i.bak "s/^version: .*/version: $new_version/" "${{ env.METADATA_FILE_PATH }}"
+        sed -i.bak "s/^version: .*/version: $new_version/" "${{ inputs.METADATA_FILE_PATH }}"
       env:
         new_version: ${{ env.new_version }}
 
@@ -62,6 +59,6 @@ jobs:
         git config --global user.email "${{ github.actor }}@users.noreply.github.com"
         git config --global user.name "${{ github.actor }}"
 
-        git add "${{ env.METADATA_FILE_PATH }}"
+        git add "${{ inputs.METADATA_FILE_PATH }}"
         git commit -m "ci: bump version [skip ci]"
         git push
