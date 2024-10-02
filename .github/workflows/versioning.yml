@@ -1,0 +1,59 @@
+name: Version
+
+on: 
+  workflow_call: 
+    inputs:
+      VERSION_FILE_PATH:
+        type: string
+        description: 'Path to the metadata file containing the version number'
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    name: Version
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Read last version
+      shell: bash
+      run: |
+        version=$(grep -E '^version: [0-9]+\.[0-9]+\.[0-9]+' "${{ inputs.VERSION_FILE_PATH }}" | awk '{print $2}')
+        echo "version=$version" >> $GITHUB_ENV
+
+    - name: Calculate new version
+      shell: bash
+      run: |
+        IFS='.' read -r major minor patch <<< "$version"
+
+        commit_message=$(git log -1 --pretty=%B)
+
+        if [[ "$commit_message" == fix:* ]]; then
+          patch=$((patch + 1))
+        elif [[ "$commit_message" == feat:* ]]; then
+          minor=$((minor + 1))
+        elif [[ "$commit_message" == BREAKING:* || "$commit_message" == *!:* ]]; then
+          major=$((major + 1))
+        fi
+
+        new_version="$major.$minor.$patch"
+        echo "new_version=$new_version" >> $GITHUB_ENV
+      env:
+        version: ${{ env.version }}
+
+    - name: Write new version
+      shell: bash
+      run: |
+        sed -i.bak "s/^version: .*/version: $new_version/" "${{ inputs.VERSION_FILE_PATH }}"
+      env:
+        new_version: ${{ env.new_version }}
+
+    - name: Amend last commit with new version
+      shell: bash
+      run: |
+        git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+        git config --global user.name "${{ github.actor }}"
+
+        git add "${{ inputs.VERSION_FILE_PATH }}"
+        git commit --amend --no-edit
+        git push
