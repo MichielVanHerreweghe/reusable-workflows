@@ -1,0 +1,19 @@
+name: Test Versioning
+
+on:
+  pull_request: 
+    branches:
+      - main
+    paths:
+      - 'GitHub/versioning.yml'
+      - 'tests/version/**'
+
+jobs:
+  test:
+    name: Test Versioning Pipeline
+    runs-on: ubuntu-latest
+    steps:
+        - name:  Checkout code
+          uses: actions/checkout@v2
+        - name: Run versioning
+          uses: ./.github/workflows/versioning.yml
