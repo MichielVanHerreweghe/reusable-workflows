@@ -1,8 +1,6 @@
 name: Version
 
 on: 
-  push:
-
   workflow_call: 
     inputs:
       METADATA_FILE_PATH:
